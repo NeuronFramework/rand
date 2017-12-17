@@ -1,13 +1,15 @@
 package rand
 
 import (
+	"bytes"
 	"crypto/rand"
-	"encoding/base64"
 	"encoding/hex"
+	"math/big"
+	"strconv"
 )
 
-func NextBytes(nByte int) []byte {
-	r := make([]byte, nByte)
+func NextBytes(nBytes int) []byte {
+	r := make([]byte, nBytes)
 	_, err := rand.Read(r)
 	if err != nil {
 		panic(err)
@@ -16,10 +18,20 @@ func NextBytes(nByte int) []byte {
 	return r
 }
 
-func NextHex(nByte int) string {
-	return hex.Dump(NextBytes(nByte))
+func NextHex(nBytes int) string {
+	return hex.EncodeToString(NextBytes(nBytes))
 }
 
-func NextBase64(nByte int) string {
-	return base64.StdEncoding.EncodeToString(NextBytes(nByte))
+func NextNumberFixedLength(nLength int) string {
+	b := NextBytes(nLength)
+	buf := bytes.NewBufferString("")
+	for _, v := range b {
+		buf.WriteString(strconv.Itoa(int(v) % 10))
+	}
+	return buf.String()
+}
+
+func NextNumber(nBytes int) string {
+	b := NextBytes(nBytes)
+	return (&big.Int{}).SetBytes(b).Text(10)
 }
